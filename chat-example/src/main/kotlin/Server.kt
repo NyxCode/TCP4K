@@ -1,40 +1,39 @@
-import de.nyxcode.tcp4k.ConnectionClosedEvent
-import de.nyxcode.tcp4k.Server
-import de.nyxcode.tcp4k.register
-import org.slf4j.LoggerFactory
+
+import de.nyxcode.tcp4k.*
 import java.time.LocalDateTime
 
 fun main(args: Array<String>) {
-    val log = LoggerFactory.getLogger("Server")
     val config = Server.ServerConfig(port = 8888)
     val server = Server.create(config)
     val handler = server.handler
 
-    handler.register<Any> { _, msg -> log.info("received ${msg::class.simpleName}") }
+    handler.apply {
+        register<ConnectionExceptionEvent> { connection, _ -> connection.close() }
 
-    handler.register<ConnectionClosedEvent> { con, _ ->
-        val connected = con["connected"] != null
-        if(connected) handler.trigger(con, PacketDisconnect())
-    }
+        register<ConnectionClosedEvent> { connection, _ ->
+            val connected = connection.nickname != null
+            if (connected) trigger(connection, PacketDisconnect())
+        }
 
-    handler.register<PacketConnect> { connection, (nickname) ->
-        connection["nickname"] = nickname
-        val response = PacketUserConnected(nickname, now())
-        server.broadcast(response)
-    }
+        register<PacketConnect> { connection, (nickname) ->
+            connection.nickname = nickname
+            val response = PacketUserConnected(nickname, now())
+            server.broadcast(response)
+        }
 
-    handler.register<PacketDisconnect> { connection, _ ->
-        val nickname = connection["nickname"] as String
-        connection["nickname"] = null
-        val response = PacketUserDisconnected(nickname, now())
-        connection.close()
-        server.broadcast(response)
-    }
+        register<PacketDisconnect> { connection, _ ->
+            val nickname = connection.nickname!!
+            connection.nickname = null
+            val response = PacketUserDisconnected(nickname, now())
+            connection.close()
+            server.broadcast(response)
+        }
 
-    handler.register<PacketOutgoingMessage> { con, (message) ->
-        val nickname = con["nickname"] as String
-        val response = PacketIncomingMessage(nickname, message, now())
-        server.broadcast(response)
+        register<PacketOutgoingMessage> { connection, (message) ->
+            val nickname = connection.nickname!!
+            val response = PacketIncomingMessage(nickname, message, now())
+            server.broadcast(response)
+        }
     }
 
     server.start()
@@ -42,3 +41,11 @@ fun main(args: Array<String>) {
 }
 
 fun now(): LocalDateTime = LocalDateTime.now()
+
+var Connection.nickname: String?
+    get() {
+        return this["nickname"] as? String?
+    }
+    set(value) {
+        this["nickname"] = value
+    }

@@ -2,8 +2,8 @@ package de.nyxcode.tcp4k
 
 interface Event
 
-class ConnectionEstablishedEvent(val connection: Connection): Event
+data class ConnectionEstablishedEvent(val connection: Connection): Event
 
-class ConnectionClosedEvent(val connection: Connection): Event
+data class ConnectionClosedEvent(val connection: Connection): Event
 
-class ConnectionExceptionEvent(val cause: Throwable): Event
+data class ConnectionExceptionEvent(val cause: Throwable): Event
