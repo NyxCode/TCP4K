@@ -36,8 +36,7 @@ fun main(args: Array<String>) {
         }
     }
 
-    server.start()
-    server.synchronize()
+    server.start().synchronize()
 }
 
 fun now(): LocalDateTime = LocalDateTime.now()

@@ -25,8 +25,7 @@ fun main(args: Array<String>) {
         }
     }
 
-    client.connect()
-    client.send(PacketConnect(nickname))
+    client.connect().send(PacketConnect(nickname))
 
     while (client.connected) {
         val message = input.nextLine()
