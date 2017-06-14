@@ -24,9 +24,10 @@ class DefaultClient(override val config: Client.ClientConfig,
             return connection?.open ?: false
         }
 
-    override fun synchronize() {
+    override fun synchronize(): DefaultClient {
         checkState()
         connection?.channel?.closeFuture()?.sync()
+        return this
     }
 
     companion object : KLogging()
@@ -47,31 +48,35 @@ class DefaultClient(override val config: Client.ClientConfig,
         eventLoop.shutdownGracefully().get()
     }
 
-    override fun connect() {
+    override fun connect(): DefaultClient {
         checkState()
         checkDisconnected()
         val future = createBootstrap().connect(config.host, config.port)
         future.get()
         connection = DefaultConnection(future.channel())
+        return this
     }
 
-    override fun disconnect() {
+    override fun disconnect(): DefaultClient {
         checkState()
         checkConnected()
         connection?.channel?.close()?.get()
         connection = null
+        return this
     }
 
-    override fun send(msg: Serializable) {
+    override fun send(msg: Serializable): DefaultClient {
         checkState()
         checkConnected()
         connection!!.send(msg)
+        return this
     }
 
-    override fun send(vararg msg: Serializable) {
+    override fun send(vararg msg: Serializable): DefaultClient {
         checkState()
         checkConnected()
         connection!!.send(*msg)
+        return this
     }
 
     private fun createBootstrap() = Bootstrap()

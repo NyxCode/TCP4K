@@ -14,15 +14,15 @@ interface Client : Closeable {
 
     val handler: ListenerHandler
 
-    fun connect()
+    fun connect(): Client
 
-    fun disconnect()
+    fun disconnect(): Client
 
-    fun send(msg: Serializable)
+    fun send(msg: Serializable): Client
 
-    fun send(vararg msg: Serializable)
+    fun send(vararg msg: Serializable): Client
 
-    fun synchronize()
+    fun synchronize(): Client
 
     class ClientConfig(val host: String,
                        val port: Int,

@@ -15,13 +15,13 @@ interface Server: Closeable {
 
     val channel: Channel?
 
-    fun start()
+    fun start(): Server
 
-    fun stop()
+    fun stop(): Server
 
-    fun synchronize()
+    fun synchronize(): Server
 
-    fun broadcast(msg: Serializable)
+    fun broadcast(msg: Serializable): Server
 
     class ServerConfig(val port: Int,
                        val bossIoThreads: Int = 1,

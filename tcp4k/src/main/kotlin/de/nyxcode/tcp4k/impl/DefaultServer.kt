@@ -31,20 +31,22 @@ class DefaultServer(override val config: Server.ServerConfig,
     override val connections: Collection<Connection>
         get() = _connections.values
 
-    override fun start() {
+    override fun start(): DefaultServer {
         checkState()
         checkStopped()
         val future = createBootstrap().bind()
         future.get()
         channel = future.channel()
         logger.info("Server successfully started!")
+        return this
     }
 
-    override fun stop() {
+    override fun stop(): DefaultServer {
         checkState()
         checkStarted()
         channel?.close()?.get()
         logger.info("Server successfully stopped!")
+        return this
     }
 
     override fun close() {
@@ -55,13 +57,17 @@ class DefaultServer(override val config: Server.ServerConfig,
         workerEventLoop.shutdownGracefully().get()
     }
 
-    override fun synchronize() {
+    override fun synchronize(): DefaultServer {
         checkState()
         checkStarted()
         channel?.closeFuture()?.sync()
+        return this
     }
 
-    override fun broadcast(msg: Serializable) = connections.forEach { it.send(msg) }
+    override fun broadcast(msg: Serializable): DefaultServer{
+        connections.forEach { it.send(msg) }
+        return this
+    }
 
     private fun checkState() {
         if(closed) throw IllegalStateException("Closed!")

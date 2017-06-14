@@ -11,13 +11,15 @@ interface Connection: Closeable {
         channel.close().get()
     }
 
-    fun send(obj: Serializable) {
+    fun send(obj: Serializable): Connection {
         channel.writeAndFlush(obj)
+        return this
     }
 
-    fun send(vararg obj: Serializable) {
+    fun send(vararg obj: Serializable): Connection {
         obj.forEach { channel.write(it) }
         channel.flush()
+        return this
     }
 
     val open: Boolean
