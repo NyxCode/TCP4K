@@ -1,5 +1,5 @@
 # TCP4K
-TCP4K is a tiny library in Kotlin for designing own packet-based application protocols for networking applications.
+TCP4K is a tiny library in Kotlin for designing packet-based application protocols for networking applications.
 It's **performant** and **extremely simple** to use.
 
 ## Example
