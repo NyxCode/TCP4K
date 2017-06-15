@@ -8,7 +8,8 @@ class DefaultConnection(override val channel: Channel) : Connection {
     private val state = ConcurrentHashMap<String, Any?>()
 
     override fun set(key: String, value: Any?) {
-        state[key] = value
+        if(value == null) state.remove(key)
+        else state[key] = value
     }
 
     override fun get(key: String) = state[key]

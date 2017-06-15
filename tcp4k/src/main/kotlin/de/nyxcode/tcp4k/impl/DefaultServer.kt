@@ -51,7 +51,7 @@ class DefaultServer(override val config: Server.ServerConfig,
 
     override fun close() {
         checkState()
-        if(channel != null) stop()
+        if (channel != null) stop()
         closed = true
         bossEventLoop.shutdownGracefully().get()
         workerEventLoop.shutdownGracefully().get()
@@ -64,21 +64,21 @@ class DefaultServer(override val config: Server.ServerConfig,
         return this
     }
 
-    override fun broadcast(msg: Serializable): DefaultServer{
+    override fun broadcast(msg: Serializable): DefaultServer {
         connections.forEach { it.send(msg) }
         return this
     }
 
     private fun checkState() {
-        if(closed) throw IllegalStateException("Closed!")
+        if (closed) throw IllegalStateException("Closed!")
     }
 
     private fun checkStarted() {
-        if(channel == null) throw IllegalStateException("Not started!")
+        if (channel == null) throw IllegalStateException("Not started!")
     }
 
     private fun checkStopped() {
-        if(channel != null) throw IllegalStateException("Running!")
+        if (channel != null) throw IllegalStateException("Running!")
     }
 
     private fun createBootstrap() = ServerBootstrap()
@@ -86,11 +86,11 @@ class DefaultServer(override val config: Server.ServerConfig,
             .group(bossEventLoop, workerEventLoop)
             .handler(LoggingHandler(LogLevel.DEBUG))
             .childHandler(ServerInitializer())
-            .channel(if(epoll) EpollServerSocketChannel::class.java else NioServerSocketChannel::class.java)
+            .channel(if (epoll) EpollServerSocketChannel::class.java else NioServerSocketChannel::class.java)
 
-    private fun createEventLoop(threads: Int) = if(epoll) EpollEventLoopGroup(threads) else NioEventLoopGroup(threads)
+    private fun createEventLoop(threads: Int) = if (epoll) EpollEventLoopGroup(threads) else NioEventLoopGroup(threads)
 
-    private inner class ServerInitializer: ChannelInitializer<SocketChannel>() {
+    private inner class ServerInitializer : ChannelInitializer<SocketChannel>() {
         override fun initChannel(ch: SocketChannel) {
             ch.pipeline().addLast(
                     ObjectEncoder(),
@@ -99,7 +99,7 @@ class DefaultServer(override val config: Server.ServerConfig,
         }
     }
 
-    private inner class ServerHandler: SimpleChannelInboundHandler<Any>() {
+    private inner class ServerHandler : SimpleChannelInboundHandler<Any>() {
         override fun messageReceived(ctx: ChannelHandlerContext, msg: Any) {
             val connection = _connections[ctx.channel().id()]!!
             handler.trigger(connection, msg)
@@ -122,8 +122,12 @@ class DefaultServer(override val config: Server.ServerConfig,
 
         override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
             logger.info("Exception caught! ({})", cause::class.simpleName)
-            val con = _connections[ctx.channel().id()]!!
-            handler.trigger(con, ConnectionExceptionEvent(cause))
+            val con = _connections[ctx.channel().id()]
+            if (con == null) {
+                logger.error("Exception can't be handled: Connection not initialized!", cause)
+            } else {
+                handler.trigger(con, ConnectionExceptionEvent(cause))
+            }
         }
     }
 }
