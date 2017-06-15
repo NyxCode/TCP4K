@@ -29,8 +29,12 @@ fun main(args: Array<String>) {
 
     while (client.connected) {
         val message = input.nextLine()
-        val packet = PacketOutgoingMessage(message)
-        client.send(packet)
+        if(message == "!exit") {
+            client.disconnect()
+        } else {
+            val packet = PacketOutgoingMessage(message)
+            client.send(packet)
+        }
     }
     client.close()
     input.close()

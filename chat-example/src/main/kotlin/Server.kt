@@ -1,4 +1,3 @@
-
 import de.nyxcode.tcp4k.*
 import java.time.LocalDateTime
 
@@ -24,18 +23,15 @@ fun main(args: Array<String>) {
         register<PacketDisconnect> { connection, _ ->
             val nickname = connection.nickname!!
             connection.nickname = null
-            val response = PacketUserDisconnected(nickname, now())
             connection.close()
-            server.broadcast(response)
+            server.broadcast(msg = PacketUserDisconnected(nickname, now()))
         }
 
         register<PacketOutgoingMessage> { connection, (message) ->
             val nickname = connection.nickname!!
-            val response = PacketIncomingMessage(nickname, message, now())
-            server.broadcast(response)
+            server.broadcast(msg = PacketIncomingMessage(nickname, message, now()))
         }
     }
-
     server.start().synchronize()
 }
 

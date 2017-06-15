@@ -106,7 +106,7 @@ class DefaultServer(override val config: Server.ServerConfig,
         }
 
         override fun channelActive(ctx: ChannelHandlerContext) {
-            logger.info("Client established a connection!")
+            logger.info("{} connected!", ctx.channel().remoteAddress())
             val channel = ctx.channel()
             val con = DefaultConnection(channel)
             _connections.put(channel.id(), con)
@@ -114,14 +114,14 @@ class DefaultServer(override val config: Server.ServerConfig,
         }
 
         override fun channelInactive(ctx: ChannelHandlerContext) {
-            logger.info("Client lost connection!")
+            logger.info("{} disconnected!", ctx.channel().remoteAddress())
             val id = ctx.channel().id()
             val con = _connections.remove(id)!!
             handler.trigger(con, ConnectionClosedEvent(con))
         }
 
         override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
-            logger.info("Exception caught! ({})", cause::class.simpleName)
+            logger.info("{} caught!", cause::class.simpleName)
             val con = _connections[ctx.channel().id()]
             if (con == null) {
                 logger.error("Exception can't be handled: Connection not initialized!", cause)

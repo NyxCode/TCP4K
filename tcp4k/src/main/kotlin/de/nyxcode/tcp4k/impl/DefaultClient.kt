@@ -43,8 +43,8 @@ class DefaultClient(override val config: Client.ClientConfig,
 
     override fun close() {
         checkState()
-        this.closed = true
         if (connected) disconnect()
+        this.closed = true
         eventLoop.shutdownGracefully().get()
     }
 
@@ -61,7 +61,6 @@ class DefaultClient(override val config: Client.ClientConfig,
         checkState()
         checkConnected()
         connection?.channel?.close()?.get()
-        connection = null
         return this
     }
 
@@ -118,8 +117,12 @@ class DefaultClient(override val config: Client.ClientConfig,
 
         override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
             logger.error("Exception caught! ({})", cause::class.simpleName)
-            val con = connection!!
-            handler.trigger(con, ConnectionExceptionEvent(cause))
+            val con = connection
+            if(con == null) {
+                logger.error("Exception can't be handled: Connection not initialized!", cause)
+            } else {
+                handler.trigger(con, ConnectionExceptionEvent(cause))
+            }
         }
     }
 
