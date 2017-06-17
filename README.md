@@ -8,7 +8,7 @@ Please take a look at the directory TCP4K/chat-example - It's a small, working c
 
 ```kotlin
 val server_config = Server.ServerConfig(port = 1234)
-val server = Server(server_config)
+val server = Server.create(server_config)
 
 server.handler.register<MyPacket> { connection, myPacket ->
     // A client has send a packet of type 'MyPacket'
@@ -17,7 +17,7 @@ server.handler.register<MyPacket> { connection, myPacket ->
 ...
 
 val client_config = Client.ClientConfig(host = "localhost", port = 1234)
-val client = Client(client_config)
+val client = Client.create(client_config)
 
 client.handler.register<ConnectionEstablishedEvent> { connection, event -> 
     val message = MyPacket(...)
