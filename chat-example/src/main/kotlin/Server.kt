@@ -4,9 +4,8 @@ import java.time.LocalDateTime
 fun main(args: Array<String>) {
     val config = Server.ServerConfig(port = 8888)
     val server = Server.create(config)
-    val handler = server.handler
 
-    handler.apply {
+    server.handler.apply {
         register<ConnectionExceptionEvent> { connection, _ -> connection.close() }
 
         register<ConnectionClosedEvent> { connection, _ ->
