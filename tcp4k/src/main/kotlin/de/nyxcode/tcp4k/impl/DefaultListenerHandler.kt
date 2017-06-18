@@ -21,6 +21,7 @@ class DefaultListenerHandler: ListenerHandler {
         type.superclasses.forEach { listener[it]?.triggerAll(con, obj) }
     }
 
+    @Suppress("UNCHECKED_CAST")
     private fun <T : Any> Collection<Listener<*>>.triggerAll(con: Connection, msg: T) =
             forEach { (it as Listener<T>).received(con, msg) }
 }

@@ -1,31 +1,39 @@
 package de.nyxcode.tcp4k
 
-import io.netty.channel.Channel
 import java.io.Closeable
 import java.io.Serializable
 
+/**
+ * A connection between a [Client] and a [Server]
+ */
 interface Connection: Closeable {
-    val channel: Channel
+    /**
+     * Closes this [Connection]
+     */
+    override fun close()
 
-    override fun close() {
-        channel.close().get()
-    }
+    /**
+     * Sends a message through this [Connection]
+     */
+    fun send(msg: Serializable): Connection
 
-    fun send(obj: Serializable): Connection {
-        channel.writeAndFlush(obj)
-        return this
-    }
+    /**
+     * Sends multiple messages through this [Connection]
+     */
+    fun send(vararg msg: Serializable): Connection
 
-    fun send(vararg obj: Serializable): Connection {
-        obj.forEach { channel.write(it) }
-        channel.flush()
-        return this
-    }
-
+    /**
+     * If this [Connection] is open
+     */
     val open: Boolean
-        get() = channel.run { isOpen && isActive && isWritable && isRegistered }
 
+    /**
+     * Stores state in this [Connection]
+     */
     operator fun set(key: String, value: Any?)
 
+    /**
+     * Gets state stored in this [Connection]
+     */
     operator fun get(key: String): Any?
 }

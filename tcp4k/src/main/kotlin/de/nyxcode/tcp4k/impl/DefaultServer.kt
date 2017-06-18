@@ -26,7 +26,7 @@ class DefaultServer(override val config: Server.ServerConfig,
     private val workerEventLoop = createEventLoop(config.workerIoThreads)
     private val _connections = ConcurrentHashMap<ChannelId, Connection>()
     private var closed = false
-    override var channel: Channel? = null
+    var channel: Channel? = null
 
     override val connections: Collection<Connection>
         get() = _connections.values
@@ -110,14 +110,14 @@ class DefaultServer(override val config: Server.ServerConfig,
             val channel = ctx.channel()
             val con = DefaultConnection(channel)
             _connections.put(channel.id(), con)
-            handler.trigger(con, ConnectionEstablishedEvent(con))
+            handler.trigger(con, ConnectionEstablishedEvent())
         }
 
         override fun channelInactive(ctx: ChannelHandlerContext) {
             logger.info("{} disconnected!", ctx.channel().remoteAddress())
             val id = ctx.channel().id()
             val con = _connections.remove(id)!!
-            handler.trigger(con, ConnectionClosedEvent(con))
+            handler.trigger(con, ConnectionClosedEvent())
         }
 
         override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {

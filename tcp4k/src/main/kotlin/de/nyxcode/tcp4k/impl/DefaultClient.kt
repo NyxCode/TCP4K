@@ -18,6 +18,15 @@ import java.io.Serializable
 
 class DefaultClient(override val config: Client.ClientConfig,
                     override val handler: ListenerHandler = DefaultListenerHandler()) : Client {
+
+    companion object : KLogging()
+
+    override var connection: DefaultConnection? = null
+
+    private val eventLoop = if (epoll) EpollEventLoopGroup(config.ioThreads) else NioEventLoopGroup(config.ioThreads)
+
+    private var closed = false
+
     override val connected: Boolean
         get() {
             checkState()
@@ -28,17 +37,6 @@ class DefaultClient(override val config: Client.ClientConfig,
         checkState()
         connection?.channel?.closeFuture()?.sync()
         return this
-    }
-
-    companion object : KLogging()
-
-    override var connection: Connection? = null
-    private val eventLoop = if (epoll) EpollEventLoopGroup(config.ioThreads) else NioEventLoopGroup(config.ioThreads)
-    private var closed = false
-
-    private fun finalize() {
-        if(!eventLoop.isShutdown)
-            eventLoop.shutdownGracefully().get()
     }
 
     override fun close() {
@@ -105,13 +103,13 @@ class DefaultClient(override val config: Client.ClientConfig,
             logger.info("Connection to server established!")
             val con = DefaultConnection(ctx.channel())
             connection = con
-            handler.trigger(con, ConnectionEstablishedEvent(con))
+            handler.trigger(con, ConnectionEstablishedEvent())
         }
 
         override fun channelInactive(ctx: ChannelHandlerContext) {
             logger.info("Connection to server lost!")
             val con = connection!!
-            handler.trigger(con, ConnectionClosedEvent(con))
+            handler.trigger(con, ConnectionClosedEvent())
             connection = null
         }
 
