@@ -59,7 +59,7 @@ server.broadcast()      // broadcasts a message to all clients
 server.synchronize()    // Blocks the current thread until the server is stopped
 ...
 
-val listener = object: Listener<MyPacket> { ......... }                 // creates a listener for a specific packet
+val listener = object: Listener<MyPacket> { ... }                       // creates a listener for a specific packet
 val listener = Listener<MyPacket> { connection, myPacket -> ... }       // ^^^^^^^^
 
 val handler = ...
